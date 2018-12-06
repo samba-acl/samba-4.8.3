@@ -23,15 +23,9 @@ The patch file can be used in following steps:
 		cd samba-4.8.3
 		patch -p4 < ../nfs4acl_xattr.patch
 
-4. Configure and Build samba with: 
+4. Configure and Build samba using steps listed on:
 
-		./configure --disable-cups --without-quotas --without-ad-dc --without-pam --enable-fhs --prefix=/usr --sysconfdir=/etc/ --localstatedir=/var --with-modulesdir=/usr/lib64/samba/ configure
-
-followed by 
-
-	make -j4
-
-Please note, the configuration options provided are only example. 
+		https://wiki.samba.org/index.php/Build_Samba_from_Source
 
 5. The plugin will be available at bin/default/modules/vfs/nfs4acl_xattr.so 
 
