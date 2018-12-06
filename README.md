@@ -31,6 +31,8 @@ followed by
 
 	make -j4
 
+Please note, the configuration options provided are only example. 
+
 5. The plugin will be available at bin/default/modules/vfs/nfs4acl_xattr.so 
 
 6. While creating the share, use following options
