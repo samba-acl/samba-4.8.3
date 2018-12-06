@@ -1,10 +1,9 @@
 # samba-4.8.3
 This Repository holds NFS4ACL_XATTR Plugin changes on Samba 4.8.3 which can be summarized as:
 
-* Implemented another set of XDR structure and APIs which are compliant with NFS4 ACL Format prescribed in RFC 7530
+* Implemented another set of XDR structure and APIs which are compliant with NFSv4 ACL Format prescribed in RFC 7530
 * Changed XDR attribute name to "system.nfs4_acl" which works with native NFSv4 and nfs-ganesha.
 * All owners with Special IDs along with OWNER@, GROUP@, EVERYONE@ are encoded/decoded now.
-* Did not change any of the existing XDR Backend APIs (with nfs4acl prefix) which probably intend to support both NFS 4.0 and NFS 4.1 ACL format in future using nfs_version config option. Current APIs use iflag in the nfsace4 structure which I did not find even in NFS v4.1 Spec RFC 5661. And that was causing issues in encoding/decoding XDR blobs. So the existing code is broken for my tests and needed lot of fixes if it has to support both specs.
 
 
 The patch file can be used in following steps:
