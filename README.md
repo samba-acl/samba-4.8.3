@@ -21,7 +21,7 @@ The patch file can be used in following steps:
 3. Apply the patch with: 
 	
 		cd samba-4.8.3
-		patch -p3 < nfs4acl_xattr.patch
+		patch -p3 < ../nfs4acl_xattr.patch
 
 4. Configure and Build samba with: 
 
