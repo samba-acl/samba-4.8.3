@@ -33,7 +33,7 @@ followed by
 
 5. The plugin will be available at bin/default/modules/vfs/nfs4acl_xattr.so 
 
-6. While creating the share use following options
+6. While creating the share, use following options
 
         vfs objects = nfs4acl_xattr
 	
