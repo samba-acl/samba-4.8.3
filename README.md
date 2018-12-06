@@ -30,9 +30,13 @@ make -j4
 5. The plugin will be available at bin/default/modules/vfs/nfs4acl_xattr.so 
 
 6. While creating the share use following options
+
         vfs objects = nfs4acl_xattr
+	
         nfs4acl_xattr:xattr_name = system.nfs4_acl
+	
         nfs4acl_xattr:version = 40
+	
         nfs4acl_xattr:encoding = xdr40
         
 
