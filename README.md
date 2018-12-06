@@ -34,26 +34,25 @@ The patch file can be used in following steps:
 			<path to your smbd> -b | grep MODULESDIR
 			
 
-6. While creating the share, use following options
+7. While creating the share, use following options
 
-        vfs objects = nfs4acl_xattr
+        	vfs objects = nfs4acl_xattr
 	
-        nfs4acl_xattr:xattr_name = system.nfs4_acl
+        	nfs4acl_xattr:xattr_name = system.nfs4_acl
 	
-        nfs4acl_xattr:version = 40
+        	nfs4acl_xattr:version = 40
 	
-        nfs4acl_xattr:encoding = xdr40
+        	nfs4acl_xattr:encoding = xdr40
+	
         
-
-
-* Alternatively, there is a "Samba-4.8.3.tar.bz2" file where patch is already applied and can be configured and built using Step 4.
-* nfs4acl_xattr.so compiled with Samba-4.8.3 is also uploaded, which can be placed in modules/vfs/ directory of your running samba and can be used with options specified in Step 6. Obtain modules/ directory with following command:
-
-		<path to your smbd> -b | grep MODULESDIR
-
-Reload the configuration if you happen to change any of the share parameters
+8. Reload the configuration if you happen to change any of the share parameters
 
 		smbcontrol all reload-config
+
+
+* nfs4acl_xattr.so compiled with Samba-4.8.3 is also uploaded, which can be used with your currently running Samba 4.8.3 by following steps 6 to 8. 
+
+
 
 
 
