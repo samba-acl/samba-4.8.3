@@ -10,22 +10,23 @@ This Repository holds NFS4ACL_XATTR Plugin changes on Samba 4.8.3 which can be s
 The patch file can be used in following steps:
 
 1. Download Samba 4.8.3 with:
-wget https://download.samba.org/pub/samba/stable/samba-4.8.3.tar.gz  
+
+	wget https://download.samba.org/pub/samba/stable/samba-4.8.3.tar.gz  
 
 2. untar with: 
-gunzip samba-4.8.3.tar.gz 
-tar -xf samba-4.8.3.tar
+	gunzip samba-4.8.3.tar.gz 
+	tar -xf samba-4.8.3.tar
 
 3. Apply the patch with: 
-cd samba-4.8.3
-patch -p3 < nfs4acl_xattr.patch
+	cd samba-4.8.3
+	patch -p3 < nfs4acl_xattr.patch
 
 4. Configure and Build samba with: 
-./configure --disable-cups --without-quotas --without-ad-dc --without-pam --enable-fhs --prefix=/usr --sysconfdir=/etc/ --localstatedir=/var --with-modulesdir=/usr/lib64/samba/ configure
+	./configure --disable-cups --without-quotas --without-ad-dc --without-pam --enable-fhs --prefix=/usr --sysconfdir=/etc/ --localstatedir=/var --with-modulesdir=/usr/lib64/samba/ configure
 
 followed by 
 
-make -j4
+	make -j4
 
 5. The plugin will be available at bin/default/modules/vfs/nfs4acl_xattr.so 
 
