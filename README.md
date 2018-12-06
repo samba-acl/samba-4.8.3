@@ -47,7 +47,7 @@ Please note, the configuration options provided are only example.
         
 
 
-* Alternatively, there is a Samba-4.8.3.tar.bz2 file where patch is already applied and can be configured and built using Step 4.
+* Alternatively, there is a "Samba-4.8.3.tar.bz2" file where patch is already applied and can be configured and built using Step 4.
 * nfs4acl_xattr.so compiled with Samba-4.8.3 is also uploaded, which can be placed in modules/ directory of your running samba and can be used with options specified in Step 6. Obtain modules/ directory with following command:
 
 		smbd -b | grep MODULESDIR
