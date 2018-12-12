@@ -1,5 +1,5 @@
---- /tmp/github-uploaded/samba-4.8.3-vanilla/source3/wscript	2018-12-06 15:25:47.155123990 +0530
-+++ /tmp/github-uploaded/samba-4.8.3/source3/wscript	2018-12-06 15:25:46.500105842 +0530
+--- samba-4.8.3-vanilla/source3/wscript	2018-06-26 20:12:46.000000000 +0530
++++ samba-4.8.3/source3/wscript	2018-12-12 15:34:58.281863646 +0530
 @@ -1671,7 +1671,7 @@
                                        vfs_preopen vfs_catia
                                        vfs_media_harmony vfs_unityed_media vfs_fruit vfs_shell_snap
@@ -18,8 +18,8 @@
          default_shared_modules.extend(TO_LIST('vfs_error_inject'))
  
      if conf.CONFIG_SET('AD_DC_BUILD_IS_ENABLED'):
---- /tmp/github-uploaded/samba-4.8.3-vanilla/source3/modules/nfs41acl.x	2018-12-06 15:25:47.106122633 +0530
-+++ /tmp/github-uploaded/samba-4.8.3/source3/modules/nfs41acl.x	2018-12-06 15:25:46.452104512 +0530
+--- samba-4.8.3-vanilla/source3/modules/nfs41acl.x	2018-01-17 13:38:39.000000000 +0530
++++ samba-4.8.3/source3/modules/nfs41acl.x	2018-12-12 15:34:58.229862244 +0530
 @@ -92,3 +92,15 @@
          aclflag4        na41_flag;
          nfsace4         na41_aces<>;
@@ -36,8 +36,8 @@
 +struct nfsacl40 {
 +        nfsace40         na40_aces<>;
 +};
---- /tmp/github-uploaded/samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr.h	2018-12-06 15:25:47.106122633 +0530
-+++ /tmp/github-uploaded/samba-4.8.3/source3/modules/nfs4acl_xattr.h	2018-12-06 15:25:46.452104512 +0530
+--- samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr.h	2018-01-17 13:38:39.000000000 +0530
++++ samba-4.8.3/source3/modules/nfs4acl_xattr.h	2018-12-12 15:36:30.188341320 +0530
 @@ -19,7 +19,7 @@
  #ifndef __NFS4ACL_XATTR_H__
  #define __NFS4ACL_XATTR_H__
@@ -47,8 +47,16 @@
  
  struct nfs4acl_config {
  	unsigned nfs_version;
---- /tmp/github-uploaded/samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr_xdr.c	2018-12-06 15:25:47.106122633 +0530
-+++ /tmp/github-uploaded/samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.c	2018-12-06 15:25:46.452104512 +0530
+@@ -27,6 +27,7 @@
+ 	char *xattr_name;
+ 	struct smbacl4_vfs_params nfs4_params;
+ 	enum default_acl_style default_acl_style;
++	bool validate_mode;
+ };
+ 
+ #endif /* __NFS4ACL_XATTR_H__ */
+--- samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr_xdr.c	2018-01-26 01:25:34.000000000 +0530
++++ samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.c	2018-12-12 15:34:58.230862271 +0530
 @@ -15,7 +15,9 @@
   * along with this program; if not, see <http://www.gnu.org/licenses/>.
   *
@@ -732,8 +740,8 @@
  	return NT_STATUS_OK;
  }
  
---- /tmp/github-uploaded/samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr_xdr.h	2018-12-06 15:25:47.106122633 +0530
-+++ /tmp/github-uploaded/samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.h	2018-12-06 15:25:46.452104512 +0530
+--- samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr_xdr.h	2018-01-17 13:38:39.000000000 +0530
++++ samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.h	2018-12-12 15:34:58.230862271 +0530
 @@ -19,7 +19,7 @@
  #ifndef __NFS4ACL_XATTR_XDR_H__
  #define __NFS4ACL_XATTR_XDR_H__
@@ -759,8 +767,8 @@
 +				     DATA_BLOB *blob);
  
  #endif /* __NFS4ACL_XATTR_XDR_H__ */
---- /tmp/github-uploaded/samba-4.8.3-vanilla/source3/modules/vfs_nfs4acl_xattr.c	2018-12-06 15:25:47.110122744 +0530
-+++ /tmp/github-uploaded/samba-4.8.3/source3/modules/vfs_nfs4acl_xattr.c	2018-12-06 15:25:46.455104595 +0530
+--- samba-4.8.3-vanilla/source3/modules/vfs_nfs4acl_xattr.c	2018-01-17 13:38:39.000000000 +0530
++++ samba-4.8.3/source3/modules/vfs_nfs4acl_xattr.c	2018-12-12 15:40:37.343007801 +0530
 @@ -42,6 +42,7 @@
  static const struct enum_list nfs4acl_encoding[] = {
  	{NFS4ACL_ENCODING_NDR, "ndr"},
@@ -769,7 +777,18 @@
  };
  
  /*
-@@ -228,6 +229,9 @@
+@@ -60,6 +61,10 @@
+ 				struct nfs4acl_config,
+ 				return false);
+ 
++	if (!config->validate_mode) {
++		return true;
++	}
++
+ 	if (!VALID_STAT(smb_fname->st)) {
+ 		/* might be a create */
+ 		return true;
+@@ -228,6 +233,9 @@
  	case NFS4ACL_ENCODING_XDR:
  		status = nfs4acl_xdr_blob_to_smb4(handle, mem_ctx, blob, smb4acl);
  		break;
@@ -779,7 +798,7 @@
  	default:
  		status = NT_STATUS_INTERNAL_ERROR;
  		break;
-@@ -328,6 +332,10 @@
+@@ -328,6 +336,10 @@
  		status = nfs4acl_smb4acl_to_xdr_blob(handle, talloc_tos(),
  						     smb4acl, &blob);
  		break;
@@ -790,11 +809,46 @@
  	default:
  		status = NT_STATUS_INTERNAL_ERROR;
  		break;
-@@ -524,6 +532,7 @@
+@@ -390,6 +402,12 @@
+ 	} else {
+ 		expected_mode = 0666;
+ 	}
++
++	if (!config->validate_mode) {
++		existing_mode = 0;
++		expected_mode = 0;
++	}
++
+ 	if ((existing_mode & expected_mode) != expected_mode) {
+ 		int saved_errno = 0;
+ 
+@@ -487,6 +505,7 @@
+ 	struct nfs4acl_config *config = NULL;
+ 	const struct enum_list *default_acl_style_list = NULL;
+ 	const char *default_xattr_name = NULL;
++	bool default_validate_mode = true;
+ 	int enumval;
+ 	unsigned nfs_version;
+ 	int ret;
+@@ -524,7 +543,9 @@
  
  	switch (config->encoding) {
  	case NFS4ACL_ENCODING_XDR:
 +	case NFS40ACL_ENCODING_XDR:
  		default_xattr_name = NFS4ACL_XDR_XATTR_NAME;
++		default_validate_mode = false;
  		break;
  	case NFS4ACL_ENCODING_NDR:
+ 	default:
+@@ -560,6 +581,11 @@
+ 						   "xattr_name",
+ 						   default_xattr_name);
+ 
++	config->validate_mode = lp_parm_bool(SNUM(handle->conn),
++					     "nfs4acl_xattr",
++					     "validate_mode",
++					     default_validate_mode);
++
+ 	SMB_VFS_HANDLE_SET_DATA(handle, config, NULL, struct nfs4acl_config,
+ 				return -1);
+ 
