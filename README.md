@@ -1,8 +1,9 @@
 # samba-4.8.3
 This Repository holds NFS4ACL_XATTR Plugin changes on Samba 4.8.3 which can be summarized as:
 
-* Implemented another set of XDR structure and APIs which are compliant with NFSv4 ACL Format prescribed in RFC 7530
-* Changed XDR attribute name to "system.nfs4_acl" which works with native NFSv4 and nfs-ganesha.
+* Implemented another set of XDR structure and APIs which are compliant with NFSv4 ACL Format prescribed in RFC 7530. These encodings can be used with encoding=xdr40
+* Changed default XDR attribute name to "system.nfs4_acl" which works with native NFSv4 and nfs-ganesha.
+* Also added validate_mode flag which is false by default for xdr40. This skips any RWX mode checks for files and folders during validate blob functionality
 * All owners with Special IDs along with OWNER@, GROUP@, EVERYONE@ are encoded/decoded now.
 
 
