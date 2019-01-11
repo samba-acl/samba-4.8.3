@@ -1,6 +1,6 @@
 --- samba-4.8.3-vanilla/source3/wscript	2018-06-26 20:12:46.000000000 +0530
-+++ samba-4.8.3/source3/wscript	2018-12-12 15:34:58.281863646 +0530
-@@ -1671,7 +1671,7 @@
++++ samba-4.8.3/source3/wscript	2018-12-12 19:45:05.886150070 +0530
+@@ -1671,7 +1671,7 @@ main() {
                                        vfs_preopen vfs_catia
                                        vfs_media_harmony vfs_unityed_media vfs_fruit vfs_shell_snap
                                        vfs_commit vfs_worm vfs_crossrename vfs_linux_xfs_sgid
@@ -9,7 +9,7 @@
                                    '''))
      default_shared_modules.extend(TO_LIST('auth_script idmap_tdb2 idmap_script'))
      # these have broken dependencies
-@@ -1686,7 +1686,7 @@
+@@ -1686,7 +1686,7 @@ main() {
          default_shared_modules.extend(TO_LIST('gpext_security gpext_registry gpext_scripts'))
  
      if Options.options.enable_selftest or Options.options.developer:
@@ -19,8 +19,8 @@
  
      if conf.CONFIG_SET('AD_DC_BUILD_IS_ENABLED'):
 --- samba-4.8.3-vanilla/source3/modules/nfs41acl.x	2018-01-17 13:38:39.000000000 +0530
-+++ samba-4.8.3/source3/modules/nfs41acl.x	2018-12-12 15:34:58.229862244 +0530
-@@ -92,3 +92,15 @@
++++ samba-4.8.3/source3/modules/nfs41acl.x	2018-12-12 19:45:05.887150098 +0530
+@@ -92,3 +92,15 @@ struct nfsacl41 {
          aclflag4        na41_flag;
          nfsace4         na41_aces<>;
  };
@@ -37,7 +37,7 @@
 +        nfsace40         na40_aces<>;
 +};
 --- samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr.h	2018-01-17 13:38:39.000000000 +0530
-+++ samba-4.8.3/source3/modules/nfs4acl_xattr.h	2018-12-12 15:36:30.188341320 +0530
++++ samba-4.8.3/source3/modules/nfs4acl_xattr.h	2018-12-12 19:45:05.887150098 +0530
 @@ -19,7 +19,7 @@
  #ifndef __NFS4ACL_XATTR_H__
  #define __NFS4ACL_XATTR_H__
@@ -47,7 +47,7 @@
  
  struct nfs4acl_config {
  	unsigned nfs_version;
-@@ -27,6 +27,7 @@
+@@ -27,6 +27,7 @@ struct nfs4acl_config {
  	char *xattr_name;
  	struct smbacl4_vfs_params nfs4_params;
  	enum default_acl_style default_acl_style;
@@ -56,7 +56,7 @@
  
  #endif /* __NFS4ACL_XATTR_H__ */
 --- samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr_xdr.c	2018-01-26 01:25:34.000000000 +0530
-+++ samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.c	2018-12-12 15:34:58.230862271 +0530
++++ samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.c	2018-12-12 19:45:05.888150125 +0530
 @@ -15,7 +15,9 @@
   * along with this program; if not, see <http://www.gnu.org/licenses/>.
   *
@@ -100,7 +100,7 @@
  static unsigned nfs4acl_get_naces(nfsacl41 *nacl)
  {
  	return nacl->na41_aces.na41_aces_len;
-@@ -60,6 +80,79 @@
+@@ -60,6 +80,79 @@ static void nfs4acl_set_flags(nfsacl41 *
  	nacl->na41_flag = flags;
  }
  
@@ -180,7 +180,7 @@
  static size_t nfs4acl_get_xdrblob_size(nfsacl41 *nacl)
  {
  	size_t acl_size;
-@@ -82,6 +175,12 @@
+@@ -82,6 +175,12 @@ static size_t nfs4acl_get_xdrblob_size(n
  	return acl_size;
  }
  
@@ -193,7 +193,7 @@
  static size_t nfs4acl_get_xdrblob_naces(size_t _blobsize)
  {
  	size_t blobsize = _blobsize;
-@@ -94,6 +193,45 @@
+@@ -94,6 +193,45 @@ static size_t nfs4acl_get_xdrblob_naces(
  	return (blobsize / sizeof(struct nfsace4));
  }
  
@@ -239,7 +239,7 @@
  static nfsacl41 *nfs4acl_alloc(TALLOC_CTX *mem_ctx, unsigned naces)
  {
  	size_t acl_size = sizeof(nfsacl41) + (naces * sizeof(struct nfsace4));
-@@ -139,6 +277,151 @@
+@@ -139,6 +277,151 @@ static unsigned smb4acl_to_nfs4acl_flags
  	return nfs4acl_flags;
  }
  
@@ -391,7 +391,7 @@
  static bool smb4acl_to_nfs4acl(vfs_handle_struct *handle,
  			       TALLOC_CTX *mem_ctx,
  			       struct SMB4ACL_T *smb4acl,
-@@ -214,6 +497,50 @@
+@@ -214,6 +497,50 @@ static bool smb4acl_to_nfs4acl(vfs_handl
  	return true;
  }
  
@@ -442,7 +442,7 @@
  NTSTATUS nfs4acl_smb4acl_to_xdr_blob(vfs_handle_struct *handle,
  				     TALLOC_CTX *mem_ctx,
  				     struct SMB4ACL_T *smb4acl,
-@@ -272,6 +599,44 @@
+@@ -272,6 +599,44 @@ static uint16_t nfs4acl_to_smb4acl_flags
  	return smb4acl_flags;
  }
  
@@ -487,7 +487,7 @@
  static NTSTATUS nfs4acl_xdr_blob_to_nfs4acl(struct vfs_handle_struct *handle,
  					    TALLOC_CTX *mem_ctx,
  					    DATA_BLOB *blob,
-@@ -306,6 +671,214 @@
+@@ -306,6 +671,214 @@ static NTSTATUS nfs4acl_xdr_blob_to_nfs4
  	return NT_STATUS_OK;
  }
  
@@ -702,7 +702,7 @@
  static NTSTATUS nfs4acl_to_smb4acl(struct vfs_handle_struct *handle,
  				   TALLOC_CTX *mem_ctx,
  				   nfsacl41 *nacl,
-@@ -379,6 +952,37 @@
+@@ -379,6 +952,37 @@ static NTSTATUS nfs4acl_to_smb4acl(struc
  	}
  
  	*_smb4acl = smb4acl;
@@ -741,7 +741,7 @@
  }
  
 --- samba-4.8.3-vanilla/source3/modules/nfs4acl_xattr_xdr.h	2018-01-17 13:38:39.000000000 +0530
-+++ samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.h	2018-12-12 15:34:58.230862271 +0530
++++ samba-4.8.3/source3/modules/nfs4acl_xattr_xdr.h	2018-12-12 19:45:05.888150125 +0530
 @@ -19,7 +19,7 @@
  #ifndef __NFS4ACL_XATTR_XDR_H__
  #define __NFS4ACL_XATTR_XDR_H__
@@ -751,7 +751,7 @@
  #define NFS4ACL_XDR_MAX_ACES 8192
  
  NTSTATUS nfs4acl_xdr_blob_to_smb4(struct vfs_handle_struct *handle,
-@@ -31,5 +31,15 @@
+@@ -31,5 +31,15 @@ NTSTATUS nfs4acl_smb4acl_to_xdr_blob(vfs
  				     TALLOC_CTX *mem_ctx,
  				     struct SMB4ACL_T *smbacl,
  				     DATA_BLOB *blob);
@@ -768,7 +768,7 @@
  
  #endif /* __NFS4ACL_XATTR_XDR_H__ */
 --- samba-4.8.3-vanilla/source3/modules/vfs_nfs4acl_xattr.c	2018-01-17 13:38:39.000000000 +0530
-+++ samba-4.8.3/source3/modules/vfs_nfs4acl_xattr.c	2018-12-12 15:40:37.343007801 +0530
++++ samba-4.8.3/source3/modules/vfs_nfs4acl_xattr.c	2018-12-12 19:45:05.888150125 +0530
 @@ -42,6 +42,7 @@
  static const struct enum_list nfs4acl_encoding[] = {
  	{NFS4ACL_ENCODING_NDR, "ndr"},
@@ -777,7 +777,7 @@
  };
  
  /*
-@@ -60,6 +61,10 @@
+@@ -60,6 +61,10 @@ static bool nfs4acl_validate_blob(vfs_ha
  				struct nfs4acl_config,
  				return false);
  
@@ -788,7 +788,7 @@
  	if (!VALID_STAT(smb_fname->st)) {
  		/* might be a create */
  		return true;
-@@ -228,6 +233,9 @@
+@@ -228,6 +233,9 @@ static NTSTATUS nfs4acl_blob_to_smb4(str
  	case NFS4ACL_ENCODING_XDR:
  		status = nfs4acl_xdr_blob_to_smb4(handle, mem_ctx, blob, smb4acl);
  		break;
@@ -798,7 +798,7 @@
  	default:
  		status = NT_STATUS_INTERNAL_ERROR;
  		break;
-@@ -328,6 +336,10 @@
+@@ -328,6 +336,10 @@ static bool nfs4acl_smb4acl_set_fn(vfs_h
  		status = nfs4acl_smb4acl_to_xdr_blob(handle, talloc_tos(),
  						     smb4acl, &blob);
  		break;
@@ -809,7 +809,7 @@
  	default:
  		status = NT_STATUS_INTERNAL_ERROR;
  		break;
-@@ -390,6 +402,12 @@
+@@ -390,6 +402,12 @@ static NTSTATUS nfs4acl_xattr_fset_nt_ac
  	} else {
  		expected_mode = 0666;
  	}
@@ -822,7 +822,7 @@
  	if ((existing_mode & expected_mode) != expected_mode) {
  		int saved_errno = 0;
  
-@@ -487,6 +505,7 @@
+@@ -487,6 +505,7 @@ static int nfs4acl_connect(struct vfs_ha
  	struct nfs4acl_config *config = NULL;
  	const struct enum_list *default_acl_style_list = NULL;
  	const char *default_xattr_name = NULL;
@@ -830,7 +830,7 @@
  	int enumval;
  	unsigned nfs_version;
  	int ret;
-@@ -524,7 +543,9 @@
+@@ -524,7 +543,9 @@ static int nfs4acl_connect(struct vfs_ha
  
  	switch (config->encoding) {
  	case NFS4ACL_ENCODING_XDR:
@@ -840,7 +840,7 @@
  		break;
  	case NFS4ACL_ENCODING_NDR:
  	default:
-@@ -560,6 +581,11 @@
+@@ -560,6 +581,11 @@ static int nfs4acl_connect(struct vfs_ha
  						   "xattr_name",
  						   default_xattr_name);
  
@@ -852,3 +852,57 @@
  	SMB_VFS_HANDLE_SET_DATA(handle, config, NULL, struct nfs4acl_config,
  				return -1);
  
+--- samba-4.8.3-vanilla/source3/modules/nfs4_acls.c	2018-01-17 13:38:39.000000000 +0530
++++ samba-4.8.3/source3/modules/nfs4_acls.c	2019-01-11 14:22:18.123700307 +0530
+@@ -463,6 +463,7 @@ static NTSTATUS smb_get_nt_acl_nfs4_comm
+ 	bool ok;
+ 
+ 	if (theacl==NULL) {
++		DEBUG(1,("smb_get_nt_acl_nfs4_common returning NT_STATUS_ACCESS_DENIED for theacl==NULL\n"));
+ 		TALLOC_FREE(frame);
+ 		return NT_STATUS_ACCESS_DENIED; /* special because we
+ 						 * need to think through
+@@ -647,6 +648,7 @@ static SMB_ACE4PROP_T *smbacl4_find_equa
+ 
+ 
+ static bool smbacl4_fill_ace4(
++	TALLOC_CTX *mem_ctx,
+ 	const struct smb_filename *filename,
+ 	const struct smbacl4_vfs_params *params,
+ 	uid_t ownerUID,
+@@ -727,8 +729,24 @@ static bool smbacl4_fill_ace4(
+ 		if (sid_to_uid(&ace_nt->trustee, &uid) && uid == ownerUID) {
+ 			ace_v4->who.uid = uid;
+ 		} else if (sid_to_gid(&ace_nt->trustee, &gid)) {
+-			ace_v4->aceFlags |= SMB_ACE4_IDENTIFIER_GROUP;
+-			ace_v4->who.gid = gid;
++		/*
++		 * If sid_to_uid and sid_to_gid both succeed for SID,
++ 		 * SMB_ACE4_IDENTIFIER_GROUP is wrongly set.
++ 		 * Check for SID type as well before setting the flag
++ 		 */
++		const char *sid_domain = NULL;
++		const char *sid_name = NULL;
++		enum lsa_SidType sid_type;
++		bool ret = lookup_sid(mem_ctx, &ace_nt->trustee,
++			&sid_domain, &sid_name, &sid_type);
++		if (ret) {
++			if (sid_type == SID_NAME_DOM_GRP) {
++				DEBUG(1, ("SID Type is SID_NAME_DOM_GRP"));
++				ace_v4->aceFlags |=
++					SMB_ACE4_IDENTIFIER_GROUP;
++			}
++		}
++		ace_v4->who.gid = gid;
+ 		} else if (sid_to_uid(&ace_nt->trustee, &uid)) {
+ 			ace_v4->who.uid = uid;
+ 		} else if (dom_sid_compare_domain(&ace_nt->trustee,
+@@ -879,7 +897,7 @@ static struct SMB4ACL_T *smbacl4_win2nfs
+ 		SMB_ACE4PROP_T	ace_v4;
+ 		bool	addNewACE = true;
+ 
+-		if (!smbacl4_fill_ace4(fsp->fsp_name, pparams,
++		if (!smbacl4_fill_ace4(mem_ctx, fsp->fsp_name, pparams,
+ 				       ownerUID, ownerGID,
+ 				       dacl->aces + i, &ace_v4)) {
+ 			DEBUG(3, ("Could not fill ace for file %s, SID %s\n",
