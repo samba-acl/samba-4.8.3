@@ -853,8 +853,69 @@
  				return -1);
  
 --- samba-4.8.3-vanilla/source3/modules/nfs4_acls.c	2018-01-17 13:38:39.000000000 +0530
-+++ samba-4.8.3/source3/modules/nfs4_acls.c	2019-01-11 14:22:18.123700307 +0530
-@@ -463,6 +463,7 @@ static NTSTATUS smb_get_nt_acl_nfs4_comm
++++ samba-4.8.3/source3/modules/nfs4_acls.c	2019-01-14 21:51:24.642977507 +0530
+@@ -85,6 +85,14 @@ int smbacl4_get_vfs_params(struct connec
+ 	params->do_chown = lp_parm_bool(SNUM(conn), SMBACL4_PARAM_TYPE_NAME,
+ 		"chown", true);
+ 
++	params->do_reorder = lp_parm_bool(SNUM(conn), SMBACL4_PARAM_TYPE_NAME,
++		"reorder", true);
++	if (params->do_reorder) {
++		DEBUG(10, ("reorder enabled\n"));
++	} else {
++		DEBUG(10, ("reorder disabled\n"));
++	}
++
+ 	enumval = lp_parm_enum(SNUM(conn), SMBACL4_PARAM_TYPE_NAME, "acedup",
+ 			       enum_smbacl4_acedups, e_dontcare);
+ 	if (enumval == -1) {
+@@ -289,6 +297,45 @@ static int smbacl4_fGetFileOwner(files_s
+ 	return 0;
+ }
+ 
++/* Keep DENY aces at top */
++static bool reorder_nt_aces(TALLOC_CTX *mem_ctx,
++	struct security_ace *nt_ace_list,
++	int good_aces)
++{
++	struct security_ace *nt_ace_list_copy = NULL;
++	int i, copied = 0;
++	
++	nt_ace_list_copy = talloc_memdup(mem_ctx, nt_ace_list, sizeof (struct security_ace) * good_aces);
++	if (nt_ace_list_copy==NULL)
++	{
++		DBG_ERR("talloc error with %d aces", good_aces);
++		errno = ENOMEM;
++		return false;
++	}
++
++	for (i = 0; i < good_aces; i++) {
++		if (nt_ace_list_copy[i].type == SEC_ACE_TYPE_ACCESS_DENIED) {
++			DEBUG(10, ("reorder_nt_aces deny ace %d\n", i));
++			nt_ace_list [copied ++] = nt_ace_list_copy[i];
++		}
++	}
++	for (i = 0; i < good_aces; i++) {
++		if (nt_ace_list_copy[i].type == SEC_ACE_TYPE_ACCESS_ALLOWED) {
++			DEBUG(10, ("reorder_nt_aces allowed ace %d\n", i));
++			nt_ace_list [copied ++] = nt_ace_list_copy[i];
++		}
++	}
++
++	TALLOC_FREE(nt_ace_list_copy);
++
++	if (copied != good_aces) {
++		DEBUG(1, ("reorder_nt_aces copied %d good_aces %d", copied, good_aces));
++		return false;
++	}
++
++	return true;
++}
++
+ static bool smbacl4_nfs42win(TALLOC_CTX *mem_ctx,
+ 	const struct smbacl4_vfs_params *params,
+ 	struct SMB4ACL_T *acl, /* in */
+@@ -463,6 +510,7 @@ static NTSTATUS smb_get_nt_acl_nfs4_comm
  	bool ok;
  
  	if (theacl==NULL) {
@@ -862,7 +923,20 @@
  		TALLOC_FREE(frame);
  		return NT_STATUS_ACCESS_DENIED; /* special because we
  						 * need to think through
-@@ -647,6 +648,7 @@ static SMB_ACE4PROP_T *smbacl4_find_equa
+@@ -481,6 +529,12 @@ static NTSTATUS smb_get_nt_acl_nfs4_comm
+ 		return map_nt_error_from_unix(errno);
+ 	}
+ 
++	if (params->do_reorder) {
++		ok = reorder_nt_aces(mem_ctx, nt_ace_list, good_aces);		
++	} else {
++		DEBUG(10, ("reorder disabled\n"));
++	}
++
+ 	psa = make_sec_acl(frame, NT4_ACL_REVISION, good_aces, nt_ace_list);
+ 	if (psa == NULL) {
+ 		DEBUG(2,("make_sec_acl failed\n"));
+@@ -647,6 +701,7 @@ static SMB_ACE4PROP_T *smbacl4_find_equa
  
  
  static bool smbacl4_fill_ace4(
@@ -870,7 +944,7 @@
  	const struct smb_filename *filename,
  	const struct smbacl4_vfs_params *params,
  	uid_t ownerUID,
-@@ -727,8 +729,24 @@ static bool smbacl4_fill_ace4(
+@@ -727,8 +782,24 @@ static bool smbacl4_fill_ace4(
  		if (sid_to_uid(&ace_nt->trustee, &uid) && uid == ownerUID) {
  			ace_v4->who.uid = uid;
  		} else if (sid_to_gid(&ace_nt->trustee, &gid)) {
@@ -897,7 +971,7 @@
  		} else if (sid_to_uid(&ace_nt->trustee, &uid)) {
  			ace_v4->who.uid = uid;
  		} else if (dom_sid_compare_domain(&ace_nt->trustee,
-@@ -879,7 +897,7 @@ static struct SMB4ACL_T *smbacl4_win2nfs
+@@ -879,7 +950,7 @@ static struct SMB4ACL_T *smbacl4_win2nfs
  		SMB_ACE4PROP_T	ace_v4;
  		bool	addNewACE = true;
  
@@ -906,3 +980,19 @@
  				       ownerUID, ownerGID,
  				       dacl->aces + i, &ace_v4)) {
  			DEBUG(3, ("Could not fill ace for file %s, SID %s\n",
+--- samba-4.8.3-vanilla/source3/modules/nfs4_acls.h	2018-01-15 02:11:58.000000000 +0530
++++ samba-4.8.3/source3/modules/nfs4_acls.h	2019-01-14 21:51:24.719978868 +0530
+@@ -110,11 +110,12 @@ typedef struct _SMB_ACE4PROP_T {
+ struct SMB4ACL_T;
+ struct SMB4ACE_T;
+ 
+-enum smbacl4_mode_enum {e_simple=0, e_special=1};
++enum smbacl4_mode_enum {e_simple=0, e_special=1, e_3dfs};
+ enum smbacl4_acedup_enum {e_dontcare=0, e_reject=1, e_ignore=2, e_merge=3};
+ 
+ struct smbacl4_vfs_params {
+ 	enum smbacl4_mode_enum mode;
++	bool do_reorder;
+ 	bool do_chown;
+ 	enum smbacl4_acedup_enum acedup;
+ 	bool map_full_control;
